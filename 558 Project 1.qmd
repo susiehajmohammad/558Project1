@@ -56,3 +56,20 @@ head(long_updated, 5)
 
 ```
 
+## Question 4
+
+```{r}
+#State Dataset (not finished)
+row_names <- rownames(long_updated)
+state_subset <- row_names %in% grep(pattern = ", \\w\\w", long_updated$Area_name)
+state_data <- subset(long_updated, county_subset)
+class(county_data) <- c("county", class(county_data))
+head(state_data, 10)
+
+#County Dataset
+county_subset <- row_names %in% grep(pattern = ", \\w\\w", long_updated$Area_name)
+county_data <- subset(long_updated, county_subset)
+class(county_data) <- c("county", class(county_data))
+head(county_data, 10)
+```
+
