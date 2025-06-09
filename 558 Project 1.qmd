@@ -39,4 +39,8 @@ head(census_data1, 5)
 
 ## Question 2
 
-test
+```{r}
+census_long <- census_data1 |> pivot_longer(cols = ends_with("D"), names_to = "EnrollmentID", values_to = "Enrollment_Total")
+head(census_long,5)
+```
+
