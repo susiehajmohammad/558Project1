@@ -1,0 +1,42 @@
+---
+title: "558 Project 1"
+author: "Susan H. and Holly P."
+format: pdf
+editor: visual
+---
+Load in necessary libraries: 
+```{r}
+#| warning: FALSE
+#| message: FALSE
+library(tidyverse)
+library(readr)
+
+
+```
+
+
+Read in data using read_csv(): 
+```{r}
+#| warning: FALSE
+#| message: FALSE
+census_data <- read_csv("EDU01a.csv")
+
+
+```
+
+## Question 1
+```{r}
+
+census_data1 <- census_data |> select(Area_name, STCOU, ends_with("D")) 
+
+head(census_data1, 5)
+
+
+```
+
+## Question 2
+
+
+
+
+
