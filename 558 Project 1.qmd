@@ -71,3 +71,46 @@ state_tibble <- subset(long_updated, !(row_names %in% grep(pattern = ", \\w\\w",
 class(state_tibble) <- c("state", class(state_tibble))
 head(state_tibble, 10)
 ```
+
+## Question 5
+
+```{r}
+
+county_tibble1 <- county_tibble |> mutate(State = substr(county_tibble$Area_name, start = nchar(Area_name)-1, stop = nchar(Area_name)))
+
+county_tibble1
+
+```
+
+## Question 6
+
+```{r}
+
+state_tibble1 <- state_tibble |> mutate(Division = case_when(
+  
+  Area_name %in% c("CONNECTICUT", "MAINE", "MASSACHUSETTS", "NEW HAMPSHIRE", "RHODE ISLAND", "VERMONT") ~ "New England", 
+  Area_name %in% c("NEW JERSEY", "NEW YORK", "PENNYSYLVANIA") ~ "Mid-Atlantic", 
+  
+  Area_name %in% c("ILLINOIS", "INDIANIA", "MICHIGAN", "OHIO", "WISCONSIN") ~ "East North Central", 
+  
+  Area_name %in% c("IOWA", "KANSAS", "MINNESOTA", "MISSOURI", "NEBRASKA", "NORTH DAKOTA", "SOUTH DAKOTA") ~ "West North Central", 
+  
+  Area_name %in% c("DELAWARE", "DISTRICT OF COLUMBIA", "District of Columbia", "FLORIDA", "GEORGIA", "MARYLAND", "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA", "WEST VIRGINIA") ~ "South Atlantic", 
+  
+  Area_name %in% c("ALABAMA", "KENTUCKY", "MISSISSIPPI", "TENNESSEE") ~ "East South Central", 
+  
+  Area_name %in% c("ARKANSAS", "LOUISIANA", "OKLAHOMA", "TEXAS") ~"West South Central", 
+  
+  Area_name %in% c("ARIZONA", "COLORADO", "IDAHO", "NEVADA", "MONTANA", "NEW MEXICO", "UTAH", "WYOMING") ~ "Mountain", 
+  
+  Area_name %in% c("ALASKA", "CALIFORNIA", "HAWAII", "OREGON", "WASHINGTON") ~ "Pacific", .default = "ERROR"
+  
+))
+
+state_tibble1
+
+```
+
+
+
+
