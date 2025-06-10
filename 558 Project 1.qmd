@@ -21,7 +21,7 @@ Read in data using read_csv():
 ```{r}
 #| warning: FALSE
 #| message: FALSE
-census_data <- read_csv("EDU01a.csv")
+census_data <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
 
 
 ```
@@ -111,6 +111,43 @@ state_tibble1
 
 ```
 
+Read in second data set
+```{r}
+census_data2 <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
+```
 
+# Write Function for steps 1 and 2
+```{r}
+census_data_function <- function(data, values = "Enrollment_Total") {
+  
+ long_data <- data |> 
+   select(Area_name, STCOU, ends_with("D")) |> 
+   pivot_longer(cols = ends_with("D"), names_to = "EnrollmentID", values_to = values)
 
+return(head(long_data,5))
+}
+```
+
+```{r}
+census_data_function(census_data2)
+```
+
+# Write Function for step 3
+there are now years after 1999 so we have to change our year mutate function
+```{r}
+step3func <- function(data, values = "EnrollmentID") {
+  long_data = census_data_function(data) 
+  
+  long_updated <- long_data |> 
+    mutate(Year = as.numeric(substr(EnrollmentID, start = 8, stop = 9))) |>  
+    mutate(Year = ifelse(Year > 25, Year + 1900, Year + 2000)) |> 
+    mutate(Measurement = substr(EnrollmentID, start = 1, stop = 7))
+
+return(head(long_updated, 5))
+}
+```
+
+```{r}
+step3func(census_data1)
+```
 
