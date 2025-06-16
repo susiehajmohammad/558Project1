@@ -223,7 +223,7 @@ state_tibble <- subset(long_data, !(row_names %in% grep(pattern = ", \\w\\w", lo
 class(state_tibble) <- c("state", class(state_tibble))
 
 #return both tibbles in a list
-return(list(step5fun(county_tibble), step6func(state_tibble)))
+return(list(step5func(county_tibble), step6func(state_tibble)))
 }
 ```
 
