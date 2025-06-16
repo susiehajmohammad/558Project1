@@ -191,6 +191,36 @@ step5fun(county_tibble2)
 ```
 
 
+# Write Function for step 6
+```{r}
+step6func <- function(tibble) {
+state_tibble1 <- tibble |> mutate(Division = case_when(
+  
+  Area_name %in% c("CONNECTICUT", "MAINE", "MASSACHUSETTS", "NEW HAMPSHIRE", "RHODE ISLAND", "VERMONT") ~ "New England", 
+  Area_name %in% c("NEW JERSEY", "NEW YORK", "PENNYSYLVANIA") ~ "Mid-Atlantic", 
+  
+  Area_name %in% c("ILLINOIS", "INDIANIA", "MICHIGAN", "OHIO", "WISCONSIN") ~ "East North Central", 
+  
+  Area_name %in% c("IOWA", "KANSAS", "MINNESOTA", "MISSOURI", "NEBRASKA", "NORTH DAKOTA", "SOUTH DAKOTA") ~ "West North Central", 
+  
+  Area_name %in% c("DELAWARE", "DISTRICT OF COLUMBIA", "District of Columbia", "FLORIDA", "GEORGIA", "MARYLAND", "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA", "WEST VIRGINIA") ~ "South Atlantic", 
+  
+  Area_name %in% c("ALABAMA", "KENTUCKY", "MISSISSIPPI", "TENNESSEE") ~ "East South Central", 
+  
+  Area_name %in% c("ARKANSAS", "LOUISIANA", "OKLAHOMA", "TEXAS") ~"West South Central", 
+  
+  Area_name %in% c("ARIZONA", "COLORADO", "IDAHO", "NEVADA", "MONTANA", "NEW MEXICO", "UTAH", "WYOMING") ~ "Mountain", 
+  
+  Area_name %in% c("ALASKA", "CALIFORNIA", "HAWAII", "OREGON", "WASHINGTON") ~ "Pacific", .default = "ERROR"
+  
+))
 
+return(state_tibble1)
+}
+```
+
+```{r}
+step6func(state_tibble)
+```
 
 
