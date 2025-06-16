@@ -117,7 +117,7 @@ Read in second data set
 census_data2 <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 ```
 
-# Write Function for steps 1 and 2
+## Write Function for steps 1 and 2
 
 ```{r}
 census_data_function <- function(data, values = "Enrollment_Total") {
@@ -135,9 +135,9 @@ return(long_data)
 census_data_function(census_data2)
 ```
 
-# Write Function for step 3
+## Write Function for step 3
 
-there are now years after 1999 so we have to change our year mutate function
+There are now years after 1999 so we have to change our year mutate function
 
 ```{r}
 step3func <- function(long_data, values = "Enrollment_Total") {
@@ -155,8 +155,8 @@ step3func <- function(long_data, values = "Enrollment_Total") {
 step3func(census_long)
 ```
 
+## Write Function for step 5
 
-# Write Function for step 5
 ```{r}
 step5fun <- function(tibble) {
 county_tibble_result <- tibble |> mutate(State = substr(tibble$Area_name, start = nchar(Area_name)-1, stop = nchar(Area_name)))
@@ -169,8 +169,8 @@ return(county_tibble_result)
 step5fun(county_tibble1)
 ```
 
+## Write Function for step 6
 
-# Write Function for step 6
 ```{r}
 step6func <- function(tibble) {
 state_tibble1 <- tibble |> mutate(Division = case_when(
@@ -202,7 +202,8 @@ return(state_tibble1)
 step6func(state_tibble)
 ```
 
-# Write Function for steps 4,5,6
+## Write Function for steps 4,5,6
+
 ```{r}
 step456func <- function(long_data, values = "Enrollment_Total") {
   
@@ -222,7 +223,8 @@ return(list(step5fun(county_tibble), step6func(state_tibble)))
 step456func(long_updated)
 ```
 
-#Wrapper function
+## Wrapper function
+
 ```{r}
 my_wrapper <- function(url, values = "Enrollment_Total") {
   result <- read_csv(url) |> 
@@ -233,32 +235,185 @@ my_wrapper <- function(url, values = "Enrollment_Total") {
 }
 ```
 
+## Call It and Combine Your Data
 
-# Call It and Combine Your Data
 ```{r}
-CensusA = my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", values = "Enrollment_Total")
+CensusA <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", values = "Enrollment_Total")
 ```
 
 ```{r}
-CensusB = my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", values = "Enrollment_Total")
+CensusB <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", values = "Enrollment_Total")
 ```
-
 
 ```{r}
 #Combining results of the two wrapper functions
 combine_function <- function(data1, data2, values = "Enrollment_Total") {
  county = dplyr::bind_rows(data1[[1]], data2[[1]])
  state = dplyr::bind_rows(data1[[2]], data2[[2]])
+ 
   return(list(county,state))
 }
+
 ```
 
 ```{r}
-combine_function(CensusA,CensusB)
+combined_data <- combine_function(CensusA,CensusB)
+combined_data
+
 ```
 
-# Writing a Generic Function for Summarizing
+## Writing a Generic Function for Summarizing
+
+
+Write a function for state data that plots the mean value of Enrollment over the years for each Division.  
 ```{r}
 
+plot.state <- function(data, var_name = "Enrollment_Total"){
+  data |>
+    #group by division and year
+  group_by(Division, Year) |>
+    #get mean enrollment values for the divisions across years
+  summarize(mean_enrollment = mean(get(var_name), na.rm = TRUE), .groups = "drop") |> 
+    #exclude divisions that are "ERROR"
+  filter( Division != "ERROR") |>
+  #ggplot where x axis is year and y axis are mean erollments, distiguish divisions by color
+    ggplot(aes(x = Year, y = mean_enrollment, color = Division)) +
+    #geom_line to show trend
+    geom_line() }
+
+#call the plot for the state dataset in the combined data: 
+plot(combined_data[[2]])
+
 ```
+Write a function to plot county data, users can:  specify state (if not specified default is NJ), specify top or bottom counties (top is default), specify how many top or bottom counties to show (default is 5): 
+
+```{r}
+#plot function for county data
+plot.county <- function(data, state = "NJ", type = "top", n = 5, var_name = "Enrollment_Total") {
+  #Filter data for just one state's counties
+  data_onestate <- data |> 
+    filter(State == state) |> 
+  #Get mean enrollment values grouped by area_names
+    group_by(Area_name, Year) |> 
+    summarize(mean_enrollment = mean(get(var_name), na.rm = TRUE), .groups = "drop")
+  
+  #Take filtered data and arrange it ascending and descending, use ifelse to specify n rows: 
+  
+  select_rows <- if (type == "top") { data_onestate |>
+      arrange(desc(mean_enrollment)) |>
+      slice_head(n = n) } else { data_onestate |>
+      arrange((mean_enrollment)) |>
+      slice_head(n = n)}
+
+#filter for where the counties names are the same as the top/bottom selected rows    
+plot_data <- data_onestate |> 
+  filter(Area_name %in% select_rows$Area_name)  
+  
+#now plot the plot_data with geom_line to show trends over years
+ggplot(plot_data, aes(x = Year, y = mean_enrollment, color = Area_name)) +
+  geom_line()
+   }
+  
+plot(combined_data[[1]])
+
+
+```
+
+## Put it Together! 
+
+Run your data processing function on the two enrollment URLs given previously:
+```{r}
+CensusA <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", values = "Enrollment_Total")
+
+CensusB <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", values = "Enrollment_Total")
+```
+Run your data combining function to put these into one object:
+
+```{r}
+combined_data <- combine_function(CensusA,CensusB)
+combined_data
+
+#County data: 
+combined_data[[1]]
+
+#State data 
+combined_data[[2]]
+```
+
+Plot State data frame: 
+```{r}
+plot(combined_data[[2]])
+```
+
+Plot County data: 
+*specifying the state to be “NC”, the group being the top, the number looked at being 20*
+ 
+```{r}
+plot(combined_data[[1]], state = "NC", type = "top", n = 20)
+```
+ 
+*specifying the state to be “SC”, the group being the bottom, the number looked at being 7*
+```{r}
+plot(combined_data[[1]], state = "NC", type = "top", n = 20)
+```
+
+*without specifying anything (defaults used)*
+
+```{r}
+plot(combined_data[[1]])
+```
+
+*specifying the state to be “PA”, the group being the top, the number looked at being 8*
+
+```{r}
+plot(combined_data[[1]], state = "PA", type = "top", n = 8)
+```
+Run your data processing function on the four data sets:
+```{r}
+URL1 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", values = "Enrollment_Total")
+
+URL2 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv", values = "Enrollment_Total")
+
+URL3 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv", values = "Enrollment_Total")
+
+URL4 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv", values = "Enrollment_Total")
+```
+
+Data combining function to put these into one object:
+```{r}
+combined_data12 <- combine_function(URL1,URL2)
+combined_data34 <- combine_function(URL3,URL4)
+combined_data1234 <- combine_function(combined_data12,combined_data34)
+combined_data1234
+```
+
+Use the plot function on the state data frame: 
+```{r}
+plot(combined_data1234[[2]])
+```
+Use the plot function on the county data frame: 
+
+*Specifying the state to be “CA”, the group being the top, the number looked at being 15:* 
+```{r}
+plot(combined_data1234[[1]], state = "CA", type = "top", n = 15)
+```
+
+*specifying the state to be “TX”, the group being the top, the number looked at being 4*
+
+```{r}
+plot(combined_data1234[[1]], state = "TX", type = "top", n = 4)
+```
+
+*without specifying anything (defaults used)*
+```{r}
+plot(combined_data1234[[1]])
+```
+
+*specifying the state to be “NY”, the group being the top, the number looked at being 10*
+```{r}
+plot(combined_data1234[[1]], state = "NY", type = "top", n = 10)
+```
+
+
+
 
