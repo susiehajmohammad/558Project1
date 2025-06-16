@@ -27,31 +27,38 @@ census_data <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"
 ```
 
 ## Question 1
-
+Select only Area_name, STCOU, and any column that ends in "D"
 ```{r}
 
 census_data1 <- census_data |> select(Area_name, STCOU, ends_with("D")) 
 
+#displaying first 5 rows
 head(census_data1, 5)
-
 
 ```
 
 ## Question 2
-
+converting data into long format, where we want each Area_name entry to have only one Enrollment value with its own unique ID
 ```{r}
 census_long <- census_data1 |> pivot_longer(cols = ends_with("D"), names_to = "EnrollmentID", values_to = "Enrollment_Total")
+
+#displaying first 5 rows
 head(census_long,5)
 ```
 
 ## Question 3
 
 ```{r}
- #no dates above 1996
-long_updated <- census_long |> mutate( Year = as.numeric(substr(EnrollmentID, start = 8, stop = 9))) |> 
-mutate(Year = Year + 1900) |> 
-mutate(Measurement = substr(EnrollmentID, start = 1, stop = 7) )
 
+long_updated <- census_long |> 
+  #pull out the year and convert the year into a numeric 
+  mutate( Year = as.numeric(substr(EnrollmentID, start = 8, stop = 9))) |> 
+   #no dates above 1996
+  mutate(Year = Year + 1900) |> 
+  #creating new variable for identifying which measurement was grabbed
+  mutate(Measurement = substr(EnrollmentID, start = 1, stop = 7) )
+
+#displaying first 5 rows
 head(long_updated, 5)
 
 ```
@@ -61,29 +68,30 @@ head(long_updated, 5)
 ```{r}
 #County Dataset
 row_names <- rownames(long_updated)
+#using grep to subset the original data for county
 county_subset <- row_names %in% grep(pattern = ", \\w\\w", long_updated$Area_name)
 county_tibble <- subset(long_updated, county_subset)
-class(county_tibble) <- c("county", class(county_tibble))
+class(county_tibble) <- c("county", class(county_tibble)) #changing class
 head(county_tibble, 10)
 
 #State Dataset
-state_tibble <- subset(long_updated, !(row_names %in% grep(pattern = ", \\w\\w", long_updated$Area_name)))
-class(state_tibble) <- c("state", class(state_tibble))
+state_tibble <- subset(long_updated, !(row_names %in% grep(pattern = ", \\w\\w", long_updated$Area_name))) # state is what is not included in the grep for county
+class(state_tibble) <- c("state", class(state_tibble)) #changing class
 head(state_tibble, 10)
 ```
 
 ## Question 5
 
 ```{r}
-
-county_tibble1 <- county_tibble |> mutate(State = substr(county_tibble$Area_name, start = nchar(Area_name)-1, stop = nchar(Area_name)))
+#use mutate to create a new variable for state abbreviation 
+county_tibble1 <- county_tibble |> mutate(State = substr(county_tibble$Area_name, start = nchar(Area_name)-1, stop = nchar(Area_name))) #nchar allows for differing name lengths
 
 county_tibble1
 
 ```
 
 ## Question 6
-
+Use case_when logic to create state tibble
 ```{r}
 
 state_tibble1 <- state_tibble |> mutate(Division = case_when(
@@ -120,7 +128,7 @@ census_data2 <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv
 ## Write Function for steps 1 and 2
 
 ```{r}
-census_data_function <- function(data, values = "Enrollment_Total") {
+step12func <- function(data, values = "Enrollment_Total") {
   
  long_data <- data |> 
    select(Area_name, STCOU, ends_with("D")) |> 
@@ -132,13 +140,12 @@ return(long_data)
 ```
 
 ```{r}
-census_data_function(census_data2)
+step12func(census_data2)
 ```
 
 ## Write Function for step 3
 
 There are now years after 1999 so we have to change our year mutate function
-
 ```{r}
 step3func <- function(long_data, values = "Enrollment_Total") {
   
@@ -158,7 +165,7 @@ step3func(census_long)
 ## Write Function for step 5
 
 ```{r}
-step5fun <- function(tibble) {
+step5func <- function(tibble) {
 county_tibble_result <- tibble |> mutate(State = substr(tibble$Area_name, start = nchar(Area_name)-1, stop = nchar(Area_name)))
 
 return(county_tibble_result)
@@ -166,7 +173,7 @@ return(county_tibble_result)
 ```
 
 ```{r}
-step5fun(county_tibble1)
+step5func(county_tibble1)
 ```
 
 ## Write Function for step 6
@@ -215,6 +222,7 @@ class(county_tibble) <- c("county", class(county_tibble))
 state_tibble <- subset(long_data, !(row_names %in% grep(pattern = ", \\w\\w", long_data$Area_name)))
 class(state_tibble) <- c("state", class(state_tibble))
 
+#return both tibbles in a list
 return(list(step5fun(county_tibble), step6func(state_tibble)))
 }
 ```
@@ -228,7 +236,7 @@ step456func(long_updated)
 ```{r}
 my_wrapper <- function(url, values = "Enrollment_Total") {
   result <- read_csv(url) |> 
-    census_data_function() |> 
+    step12func() |> 
      step3func() |> 
       step456func()
   return(result)
@@ -358,7 +366,7 @@ plot(combined_data[[1]], state = "NC", type = "top", n = 20)
 *specifying the state to be “SC”, the group being the bottom, the number looked at being 7*
 
 ```{r}
-plot(combined_data[[1]], state = "NC", type = "top", n = 20)
+plot(combined_data[[1]], state = "SC", type = "bottom", n = 7)
 ```
 
 *without specifying anything (defaults used)*
