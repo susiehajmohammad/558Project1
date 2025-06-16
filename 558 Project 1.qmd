@@ -236,10 +236,29 @@ my_wrapper <- function(url, values = "Enrollment_Total") {
 
 # Call It and Combine Your Data
 ```{r}
-my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", values = "Enrollment_Total")
+CensusA = my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", values = "Enrollment_Total")
 ```
 
 ```{r}
-my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", values = "Enrollment_Total")
+CensusB = my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", values = "Enrollment_Total")
+```
+
+
+```{r}
+#Combining results of the two wrapper functions
+combine_function <- function(data1, data2, values = "Enrollment_Total") {
+ county = dplyr::bind_rows(data1[[1]], data2[[1]])
+ state = dplyr::bind_rows(data1[[2]], data2[[2]])
+  return(list(county,state))
+}
+```
+
+```{r}
+combine_function(CensusA,CensusB)
+```
+
+# Writing a Generic Function for Summarizing
+```{r}
+
 ```
 
