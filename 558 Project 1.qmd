@@ -116,7 +116,7 @@ state_tibble1 <- state_tibble |> mutate(Division = case_when(
 ))
 
 state_tibble1
-
+ 
 ```
 
 Read in second data set
