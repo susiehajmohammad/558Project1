@@ -27,7 +27,9 @@ census_data <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"
 ```
 
 ## Question 1
+
 Select only Area_name, STCOU, and any column that ends in "D"
+
 ```{r}
 
 census_data1 <- census_data |> select(Area_name, STCOU, ends_with("D")) 
@@ -38,9 +40,12 @@ head(census_data1, 5)
 ```
 
 ## Question 2
+
 converting data into long format, where we want each Area_name entry to have only one Enrollment value with its own unique ID
+
 ```{r}
-census_long <- census_data1 |> pivot_longer(cols = ends_with("D"), names_to = "EnrollmentID", values_to = "Enrollment_Total")
+census_long <- census_data1 |> pivot_longer(cols = ends_with("D"), 
+                                            names_to = "EnrollmentID",    values_to = "Enrollment_Total")
 
 #displaying first 5 rows
 head(census_long,5)
@@ -75,8 +80,11 @@ class(county_tibble) <- c("county", class(county_tibble)) #changing class
 head(county_tibble, 10)
 
 #State Dataset
-state_tibble <- subset(long_updated, !(row_names %in% grep(pattern = ", \\w\\w", long_updated$Area_name))) # state is what is not included in the grep for county
-class(state_tibble) <- c("state", class(state_tibble)) #changing class
+state_tibble <- subset(long_updated, !(row_names %in% grep(pattern = ", \\w\\w", 
+long_updated$Area_name))) 
+# state is what is not included in the grep for county
+class(state_tibble) <- c("state", class(state_tibble)) 
+#changing class
 head(state_tibble, 10)
 ```
 
@@ -84,34 +92,50 @@ head(state_tibble, 10)
 
 ```{r}
 #use mutate to create a new variable for state abbreviation 
-county_tibble1 <- county_tibble |> mutate(State = substr(county_tibble$Area_name, start = nchar(Area_name)-1, stop = nchar(Area_name))) #nchar allows for differing name lengths
+county_tibble1 <- county_tibble |> mutate(State = substr(county_tibble$Area_name, 
+start = nchar(Area_name)-1, stop = nchar(Area_name))) 
+#nchar allows for differing name lengths
 
 county_tibble1
 
 ```
 
 ## Question 6
+
 Use case_when logic to create state tibble
+
 ```{r}
 
 state_tibble1 <- state_tibble |> mutate(Division = case_when(
   
-  Area_name %in% c("CONNECTICUT", "MAINE", "MASSACHUSETTS", "NEW HAMPSHIRE", "RHODE ISLAND", "VERMONT") ~ "New England", 
+  Area_name %in% c("CONNECTICUT", "MAINE", "MASSACHUSETTS", "NEW HAMPSHIRE", 
+                   "RHODE ISLAND", "VERMONT") ~ "New England", 
   Area_name %in% c("NEW JERSEY", "NEW YORK", "PENNYSYLVANIA") ~ "Mid-Atlantic", 
   
-  Area_name %in% c("ILLINOIS", "INDIANIA", "MICHIGAN", "OHIO", "WISCONSIN") ~ "East North Central", 
+  Area_name %in% c("ILLINOIS", "INDIANIA", "MICHIGAN", "OHIO", "WISCONSIN") 
+  ~ "East North Central", 
   
-  Area_name %in% c("IOWA", "KANSAS", "MINNESOTA", "MISSOURI", "NEBRASKA", "NORTH DAKOTA", "SOUTH DAKOTA") ~ "West North Central", 
+  Area_name %in% c("IOWA", "KANSAS", "MINNESOTA", "MISSOURI", 
+                   "NEBRASKA", "NORTH DAKOTA", "SOUTH DAKOTA") 
+  ~ "West North Central", 
   
-  Area_name %in% c("DELAWARE", "DISTRICT OF COLUMBIA", "District of Columbia", "FLORIDA", "GEORGIA", "MARYLAND", "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA", "WEST VIRGINIA") ~ "South Atlantic", 
+  Area_name %in% c("DELAWARE", "DISTRICT OF COLUMBIA", "District of Columbia", 
+"FLORIDA", "GEORGIA", "MARYLAND", "NORTH CAROLINA", 
+"SOUTH CAROLINA", "VIRGINIA", "WEST VIRGINIA") 
+~ "South Atlantic", 
   
-  Area_name %in% c("ALABAMA", "KENTUCKY", "MISSISSIPPI", "TENNESSEE") ~ "East South Central", 
+  Area_name %in% c("ALABAMA", "KENTUCKY", "MISSISSIPPI", "TENNESSEE") 
+~ "East South Central", 
   
-  Area_name %in% c("ARKANSAS", "LOUISIANA", "OKLAHOMA", "TEXAS") ~"West South Central", 
+  Area_name %in% c("ARKANSAS", "LOUISIANA", "OKLAHOMA", "TEXAS") 
+~"West South Central", 
   
-  Area_name %in% c("ARIZONA", "COLORADO", "IDAHO", "NEVADA", "MONTANA", "NEW MEXICO", "UTAH", "WYOMING") ~ "Mountain", 
+  Area_name %in% c("ARIZONA", "COLORADO", "IDAHO", "NEVADA", 
+                   "MONTANA", "NEW MEXICO", "UTAH", "WYOMING") 
+~ "Mountain", 
   
-  Area_name %in% c("ALASKA", "CALIFORNIA", "HAWAII", "OREGON", "WASHINGTON") ~ "Pacific", .default = "ERROR"
+  Area_name %in% c("ALASKA", "CALIFORNIA", "HAWAII", "OREGON", 
+                   "WASHINGTON") ~ "Pacific", .default = "ERROR"
   
 ))
 
@@ -122,6 +146,8 @@ state_tibble1
 Read in second data set
 
 ```{r}
+#| warning: FALSE
+#| message: FALSE
 census_data2 <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv")
 ```
 
@@ -146,6 +172,7 @@ step12func(census_data2)
 ## Write Function for step 3
 
 There are now years after 1999 so we have to change our year mutate function
+
 ```{r}
 step3func <- function(long_data, values = "Enrollment_Total") {
   
@@ -166,7 +193,8 @@ step3func(census_long)
 
 ```{r}
 step5func <- function(tibble) {
-county_tibble_result <- tibble |> mutate(State = substr(tibble$Area_name, start = nchar(Area_name)-1, stop = nchar(Area_name)))
+county_tibble_result <- tibble |> mutate(State = substr(tibble$Area_name, 
+  start = nchar(Area_name)-1, stop = nchar(Area_name)))
 
 return(county_tibble_result)
 }
@@ -182,22 +210,37 @@ step5func(county_tibble1)
 step6func <- function(tibble) {
 state_tibble1 <- tibble |> mutate(Division = case_when(
   
-  Area_name %in% c("CONNECTICUT", "MAINE", "MASSACHUSETTS", "NEW HAMPSHIRE", "RHODE ISLAND", "VERMONT") ~ "New England", 
-  Area_name %in% c("NEW JERSEY", "NEW YORK", "PENNYSYLVANIA") ~ "Mid-Atlantic", 
+  Area_name %in% c("CONNECTICUT", "MAINE", "MASSACHUSETTS",
+                   "NEW HAMPSHIRE", "RHODE ISLAND", "VERMONT") 
+  ~ "New England", 
+  Area_name %in% c("NEW JERSEY", "NEW YORK", "PENNYSYLVANIA")
+  ~ "Mid-Atlantic", 
   
-  Area_name %in% c("ILLINOIS", "INDIANIA", "MICHIGAN", "OHIO", "WISCONSIN") ~ "East North Central", 
+  Area_name %in% c("ILLINOIS", "INDIANIA", "MICHIGAN", "OHIO", 
+                   "WISCONSIN") ~ "East North Central", 
   
-  Area_name %in% c("IOWA", "KANSAS", "MINNESOTA", "MISSOURI", "NEBRASKA", "NORTH DAKOTA", "SOUTH DAKOTA") ~ "West North Central", 
+  Area_name %in% c("IOWA", "KANSAS", "MINNESOTA", "MISSOURI", 
+                   "NEBRASKA", "NORTH DAKOTA", "SOUTH DAKOTA") 
+  ~ "West North Central", 
   
-  Area_name %in% c("DELAWARE", "DISTRICT OF COLUMBIA", "District of Columbia", "FLORIDA", "GEORGIA", "MARYLAND", "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA", "WEST VIRGINIA") ~ "South Atlantic", 
+  Area_name %in% c("DELAWARE", "DISTRICT OF COLUMBIA",
+                   "District of Columbia", "FLORIDA", "GEORGIA", 
+                   "MARYLAND", "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA", "WEST VIRGINIA") 
+  ~ "South Atlantic", 
   
-  Area_name %in% c("ALABAMA", "KENTUCKY", "MISSISSIPPI", "TENNESSEE") ~ "East South Central", 
+  Area_name %in% c("ALABAMA", "KENTUCKY", "MISSISSIPPI", 
+                   "TENNESSEE") ~ "East South Central", 
   
-  Area_name %in% c("ARKANSAS", "LOUISIANA", "OKLAHOMA", "TEXAS") ~"West South Central", 
+  Area_name %in% c("ARKANSAS", "LOUISIANA", "OKLAHOMA", "TEXAS") 
+  ~"West South Central", 
   
-  Area_name %in% c("ARIZONA", "COLORADO", "IDAHO", "NEVADA", "MONTANA", "NEW MEXICO", "UTAH", "WYOMING") ~ "Mountain", 
+  Area_name %in% c("ARIZONA", "COLORADO", "IDAHO",
+                   "NEVADA", "MONTANA", "NEW MEXICO", 
+                   "UTAH", "WYOMING") ~ "Mountain", 
   
-  Area_name %in% c("ALASKA", "CALIFORNIA", "HAWAII", "OREGON", "WASHINGTON") ~ "Pacific", .default = "ERROR"
+  Area_name %in% c("ALASKA", "CALIFORNIA", "HAWAII",
+                   "OREGON", "WASHINGTON")
+  ~ "Pacific", .default = "ERROR"
   
 ))
 
@@ -219,7 +262,8 @@ county_subset <- row_names %in% grep(pattern = ", \\w\\w", long_data$Area_name)
 county_tibble <- subset(long_data, county_subset)
 class(county_tibble) <- c("county", class(county_tibble))
 
-state_tibble <- subset(long_data, !(row_names %in% grep(pattern = ", \\w\\w", long_data$Area_name)))
+state_tibble <- subset(long_data, !(row_names %in% grep(pattern = ", \\w\\w", 
+                                                        long_data$Area_name)))
 class(state_tibble) <- c("state", class(state_tibble))
 
 #return both tibbles in a list
@@ -246,11 +290,17 @@ my_wrapper <- function(url, values = "Enrollment_Total") {
 ## Call It and Combine Your Data
 
 ```{r}
-CensusA <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", values = "Enrollment_Total")
+#| warning: FALSE
+#| message: FALSE
+CensusA <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", 
+                      values = "Enrollment_Total")
 ```
 
 ```{r}
-CensusB <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", values = "Enrollment_Total")
+#| warning: FALSE
+#| message: FALSE
+CensusB <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", 
+                      values = "Enrollment_Total")
 ```
 
 ```{r}
@@ -284,7 +334,8 @@ plot.state <- function(data, var_name = "Enrollment_Total"){
   summarize(mean_enrollment = mean(get(var_name), na.rm = TRUE), .groups = "drop") |> 
     #exclude divisions that are "ERROR"
   filter( Division != "ERROR") |>
-  #ggplot where x axis is year and y axis are mean erollments, distiguish divisions by color
+  #ggplot where x axis is year and y axis are mean erollments, 
+    #distiguish divisions by color
     ggplot(aes(x = Year, y = mean_enrollment, color = Division)) +
     #geom_line to show trend
     geom_line() }
@@ -298,7 +349,8 @@ Write a function to plot county data, users can: specify state (if not specified
 
 ```{r}
 #plot function for county data
-plot.county <- function(data, state = "NJ", type = "top", n = 5, var_name = "Enrollment_Total") {
+plot.county <- function(data, state = "NJ", type = "top", n = 5, 
+                        var_name = "Enrollment_Total") {
   #Filter data for just one state's counties
   data_onestate <- data |> 
     filter(State == state) |> 
@@ -333,9 +385,13 @@ plot(combined_data[[1]])
 Run your data processing function on the two enrollment URLs given previously:
 
 ```{r}
-CensusA <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", values = "Enrollment_Total")
+#| warning: FALSE
+#| message: FALSE
+CensusA <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", 
+                      values = "Enrollment_Total")
 
-CensusB <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", values = "Enrollment_Total")
+CensusB <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", 
+                      values = "Enrollment_Total")
 ```
 
 Run your data combining function to put these into one object:
@@ -384,13 +440,19 @@ plot(combined_data[[1]], state = "PA", type = "top", n = 8)
 Run your data processing function on the four data sets:
 
 ```{r}
-URL1 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", values = "Enrollment_Total")
+#| warning: FALSE
+#| message: FALSE
+URL1 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", 
+                   values = "Enrollment_Total")
 
-URL2 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv", values = "Enrollment_Total")
+URL2 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01b.csv", 
+                   values = "Enrollment_Total")
 
-URL3 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv", values = "Enrollment_Total")
+URL3 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01c.csv",
+                   values = "Enrollment_Total")
 
-URL4 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv", values = "Enrollment_Total")
+URL4 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv", 
+                   values = "Enrollment_Total")
 ```
 
 Data combining function to put these into one object:
@@ -433,5 +495,3 @@ plot(combined_data1234[[1]])
 ```{r}
 plot(combined_data1234[[1]], state = "NY", type = "top", n = 10)
 ```
-
-
