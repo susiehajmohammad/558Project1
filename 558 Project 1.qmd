@@ -264,8 +264,8 @@ combined_data
 
 ## Writing a Generic Function for Summarizing
 
+Write a function for state data that plots the mean value of Enrollment over the years for each Division.
 
-Write a function for state data that plots the mean value of Enrollment over the years for each Division.  
 ```{r}
 
 plot.state <- function(data, var_name = "Enrollment_Total"){
@@ -285,7 +285,8 @@ plot.state <- function(data, var_name = "Enrollment_Total"){
 plot(combined_data[[2]])
 
 ```
-Write a function to plot county data, users can:  specify state (if not specified default is NJ), specify top or bottom counties (top is default), specify how many top or bottom counties to show (default is 5): 
+
+Write a function to plot county data, users can: specify state (if not specified default is NJ), specify top or bottom counties (top is default), specify how many top or bottom counties to show (default is 5):
 
 ```{r}
 #plot function for county data
@@ -319,14 +320,16 @@ plot(combined_data[[1]])
 
 ```
 
-## Put it Together! 
+## Put it Together!
 
 Run your data processing function on the two enrollment URLs given previously:
+
 ```{r}
 CensusA <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", values = "Enrollment_Total")
 
 CensusB <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", values = "Enrollment_Total")
 ```
+
 Run your data combining function to put these into one object:
 
 ```{r}
@@ -340,19 +343,20 @@ combined_data[[1]]
 combined_data[[2]]
 ```
 
-Plot State data frame: 
+Plot State data frame:
+
 ```{r}
 plot(combined_data[[2]])
 ```
 
-Plot County data: 
-*specifying the state to be “NC”, the group being the top, the number looked at being 20*
- 
+Plot County data: *specifying the state to be “NC”, the group being the top, the number looked at being 20*
+
 ```{r}
 plot(combined_data[[1]], state = "NC", type = "top", n = 20)
 ```
- 
+
 *specifying the state to be “SC”, the group being the bottom, the number looked at being 7*
+
 ```{r}
 plot(combined_data[[1]], state = "NC", type = "top", n = 20)
 ```
@@ -368,7 +372,9 @@ plot(combined_data[[1]])
 ```{r}
 plot(combined_data[[1]], state = "PA", type = "top", n = 8)
 ```
+
 Run your data processing function on the four data sets:
+
 ```{r}
 URL1 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01a.csv", values = "Enrollment_Total")
 
@@ -380,6 +386,7 @@ URL4 <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/PST01d.csv
 ```
 
 Data combining function to put these into one object:
+
 ```{r}
 combined_data12 <- combine_function(URL1,URL2)
 combined_data34 <- combine_function(URL3,URL4)
@@ -387,13 +394,16 @@ combined_data1234 <- combine_function(combined_data12,combined_data34)
 combined_data1234
 ```
 
-Use the plot function on the state data frame: 
+Use the plot function on the state data frame:
+
 ```{r}
 plot(combined_data1234[[2]])
 ```
-Use the plot function on the county data frame: 
 
-*Specifying the state to be “CA”, the group being the top, the number looked at being 15:* 
+Use the plot function on the county data frame:
+
+*Specifying the state to be “CA”, the group being the top, the number looked at being 15:*
+
 ```{r}
 plot(combined_data1234[[1]], state = "CA", type = "top", n = 15)
 ```
@@ -405,15 +415,15 @@ plot(combined_data1234[[1]], state = "TX", type = "top", n = 4)
 ```
 
 *without specifying anything (defaults used)*
+
 ```{r}
 plot(combined_data1234[[1]])
 ```
 
 *specifying the state to be “NY”, the group being the top, the number looked at being 10*
+
 ```{r}
 plot(combined_data1234[[1]], state = "NY", type = "top", n = 10)
 ```
-
-
 
 
