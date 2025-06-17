@@ -47,7 +47,8 @@ head(census_data1, 5)
 converting data into long format, where we want each Area_name entry to have only one Enrollment value with its own unique ID
 
 ```{r}
-#pivot data longer variables that end with "D", their values to Enrollment_total, names to EnrollmentID
+#pivot data longer variables that end with "D", their values to 
+#Enrollment_total, names to EnrollmentID
 census_long <- census_data1 |> pivot_longer(cols = ends_with("D"), 
             names_to = "EnrollmentID",    
            values_to = "Enrollment_Total")
@@ -188,11 +189,13 @@ There are now years after 1999 so we have to change our year mutate function
 step3func <- function(long_data, values = "Enrollment_Total") {
   
   long_updated <- long_data |> 
-    #create a new column called year, using substr to detect to 8th and 9th characters in EnrollmentID string  
+    #create a new column called year, using substr to detect to 8th and 9th 
+#characters in EnrollmentID string  
     mutate(Year = as.numeric(substr(EnrollmentID, start = 8, stop = 9))) |>  
     #account for years 2000 and up in our ifelse condition
     mutate(Year = ifelse(Year > 25, Year + 1900, Year + 2000)) |> 
-    #create a measurement column detecting the 1st through 7th characters in EnrollmentID string 
+    #create a measurement column detecting the 1st through 7th 
+    #characters in EnrollmentID string 
     mutate(Measurement = substr(EnrollmentID, start = 1, stop = 7))
   #show the new updated data set
   return(long_updated)
@@ -244,8 +247,8 @@ state_tibble1 <- tibble |> mutate(Division = case_when(
   
   Area_name %in% c("DELAWARE", "DISTRICT OF COLUMBIA",
                    "District of Columbia", "FLORIDA", "GEORGIA", 
-                   "MARYLAND", "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA", "WEST VIRGINIA") 
-  ~ "South Atlantic", 
+                   "MARYLAND", "NORTH CAROLINA", "SOUTH CAROLINA", "VIRGINIA", 
+  "WEST VIRGINIA") ~ "South Atlantic", 
   
   Area_name %in% c("ALABAMA", "KENTUCKY", "MISSISSIPPI", 
                    "TENNESSEE") ~ "East South Central", 
