@@ -10,6 +10,8 @@ Load in necessary libraries:
 ```{r}
 #| warning: FALSE
 #| message: FALSE
+
+# load necessary libraries
 library(tidyverse)
 library(readr)
 
@@ -21,6 +23,7 @@ Read in data using read_csv():
 ```{r}
 #| warning: FALSE
 #| message: FALSE
+# read in data 
 census_data <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv")
 
 
@@ -31,7 +34,7 @@ census_data <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv"
 Select only Area_name, STCOU, and any column that ends in "D"
 
 ```{r}
-
+#subset to only selected columns
 census_data1 <- census_data |> select(Area_name, STCOU, ends_with("D")) 
 
 #displaying first 5 rows
@@ -44,6 +47,7 @@ head(census_data1, 5)
 converting data into long format, where we want each Area_name entry to have only one Enrollment value with its own unique ID
 
 ```{r}
+#pivot data longer variables that end with "D", their values to Enrollment_total, names to EnrollmentID
 census_long <- census_data1 |> pivot_longer(cols = ends_with("D"), 
             names_to = "EnrollmentID",    
            values_to = "Enrollment_Total")
@@ -106,9 +110,11 @@ county_tibble1
 Use case_when logic to create state tibble
 
 ```{r}
-
+#take our initial state_tibble and then mutate 
+#to add a division column
 state_tibble1 <- state_tibble |> mutate(Division = case_when(
-  
+  #when these states are in area_name, assign "new england" 
+  #to their division column
   Area_name %in% c("CONNECTICUT", "MAINE", "MASSACHUSETTS", "NEW HAMPSHIRE", 
                    "RHODE ISLAND", "VERMONT") ~ "New England", 
   Area_name %in% c("NEW JERSEY", "NEW YORK", "PENNYSYLVANIA") ~ "Mid-Atlantic", 
@@ -157,10 +163,12 @@ census_data2 <- read_csv("https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv
 ## Write Function for steps 1 and 2
 
 ```{r}
+#function with two inputs, data and values, values default is "Enrollment_Total"
 step12func <- function(data, values = "Enrollment_Total") {
-  
+  #first take in a data set and subset using select()
  long_data <- data |> 
    select(Area_name, STCOU, ends_with("D")) |> 
+   #and then pivot the data to longer 
    pivot_longer(cols = ends_with("D"), names_to = "EnrollmentID", values_to = values)
 
 return(long_data) 
@@ -180,9 +188,13 @@ There are now years after 1999 so we have to change our year mutate function
 step3func <- function(long_data, values = "Enrollment_Total") {
   
   long_updated <- long_data |> 
+    #create a new column called year, using substr to detect to 8th and 9th characters in EnrollmentID string  
     mutate(Year = as.numeric(substr(EnrollmentID, start = 8, stop = 9))) |>  
+    #account for years 2000 and up in our ifelse condition
     mutate(Year = ifelse(Year > 25, Year + 1900, Year + 2000)) |> 
+    #create a measurement column detecting the 1st through 7th characters in EnrollmentID string 
     mutate(Measurement = substr(EnrollmentID, start = 1, stop = 7))
+  #show the new updated data set
   return(long_updated)
 }
 
@@ -195,10 +207,13 @@ step3func(census_long)
 ## Write Function for step 5
 
 ```{r}
+#create a function that makes a state column based on area_name
 step5func <- function(tibble) {
+#take in tibble and creat a state column by detecting the last two characters in Area_name. 
+  #do this by using nchar()-1 and nchar(). This give last two characters. 
 county_tibble_result <- tibble |> mutate(State = substr(tibble$Area_name, 
   start = nchar(Area_name)-1, stop = nchar(Area_name)))
-
+#show results
 return(county_tibble_result)
 }
 ```
@@ -211,6 +226,7 @@ step5func(county_tibble1)
 
 ```{r}
 step6func <- function(tibble) {
+  #take in tibble and add a division column based on area names:
 state_tibble1 <- tibble |> mutate(Division = case_when(
   
   Area_name %in% c("CONNECTICUT", "MAINE", "MASSACHUSETTS",
@@ -246,7 +262,7 @@ state_tibble1 <- tibble |> mutate(Division = case_when(
   ~ "Pacific", .default = "ERROR"
   
 ))
-
+#show results
 return(state_tibble1)
 }
 ```
@@ -258,13 +274,16 @@ step6func(state_tibble)
 ## Write Function for steps 4,5,6
 
 ```{r}
+# create a function applying steps 4,5,6
 step456func <- function(long_data, values = "Enrollment_Total") {
-  
+  #assign rownames
 row_names <- rownames(long_data)
+#grep and pattern to detect the State names in row names
 county_subset <- row_names %in% grep(pattern = ", \\w\\w", long_data$Area_name)
+#subset county data into one tibble 
 county_tibble <- subset(long_data, county_subset)
 class(county_tibble) <- c("county", class(county_tibble))
-
+#subset state data into one tibble
 state_tibble <- subset(long_data, !(row_names %in% grep(pattern = ", \\w\\w", 
                                                         long_data$Area_name)))
 class(state_tibble) <- c("state", class(state_tibble))
@@ -282,10 +301,13 @@ step456func(long_updated)
 
 ```{r}
 my_wrapper <- function(url, values = "Enrollment_Total") {
+  #take in data from url
   result <- read_csv(url) |> 
+    #apply the three functions in order
     step12func() |> 
      step3func() |> 
       step456func()
+  #show us results
   return(result)
 }
 ```
@@ -295,6 +317,7 @@ my_wrapper <- function(url, values = "Enrollment_Total") {
 ```{r}
 #| warning: FALSE
 #| message: FALSE
+#read in data
 CensusA <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", 
                       values = "Enrollment_Total")
 ```
@@ -302,22 +325,28 @@ CensusA <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.
 ```{r}
 #| warning: FALSE
 #| message: FALSE
+
+#read in data
 CensusB <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", 
                       values = "Enrollment_Total")
 ```
 
 ```{r}
 #Combining results of the two wrapper functions
+#function with three inputs
 combine_function <- function(data1, data2, values = "Enrollment_Total") {
+  #bind_rows from dplyr for county [[1]]
  county = dplyr::bind_rows(data1[[1]], data2[[1]])
+ #bind_rows from dplyr for state [[2]]
  state = dplyr::bind_rows(data1[[2]], data2[[2]])
- 
+ #return list with two tibbles, county and state respectively
   return(list(county,state))
 }
 
 ```
 
 ```{r}
+#combine_function to combine two data sets
 combined_data <- combine_function(CensusA,CensusB)
 combined_data
 
@@ -390,9 +419,11 @@ Run your data processing function on the two enrollment URLs given previously:
 ```{r}
 #| warning: FALSE
 #| message: FALSE
+
+#apply wrapper function to data from URL a
 CensusA <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01a.csv", 
                       values = "Enrollment_Total")
-
+#apply wrapper function to data from URL b
 CensusB <- my_wrapper(url = "https://www4.stat.ncsu.edu/~online/datasets/EDU01b.csv", 
                       values = "Enrollment_Total")
 ```
